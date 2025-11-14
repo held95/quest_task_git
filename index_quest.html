@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Detective Quest - Mansão Enigma</title>
+  <style>
+    /* ===========================
+       ESTILOS GERAIS (CSS)
+       =========================== */
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #1f2937 0, #020617 55%, #000 100%);
+      color: #e5e7eb;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    header {
+      padding: 20px;
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0;
+      color: #38bdf8;
+    }
+
+    header p {
+      margin-top: 4px;
+      color: #9ca3af;
+      font-size: 0.95rem;
+    }
+
+    main {
+      width: 100%;
+      max-width: 1100px;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 2fr 1.3fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 900px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .painel {
+      background: rgba(15, 23, 42, 0.95);
+      border-radius: 14px;
+      padding: 16px 18px;
+      box-shadow: 0 0 18px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(148, 163, 184, 0.15);
+    }
+
+    .painel h2 {
+      margin: 0 0 10px;
+      font-size: 1.1rem;
+      color: #f97316;
+    }
+
+    .subtitulo {
+      font-size: 0.85rem;
+      color: #9ca3af;
+      margin-top: -4px;
+      margin-bottom: 8px;
+    }
+
+    .status-label {
+      font-size: 0.9rem;
+      color: #9ca3af;
+    }
+
+    .status-valor {
+      font-weight: 600;
+      color: #a5b4fc;
+    }
+
+    .sala-atual {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      background: rgba(15, 118, 110, 0.2);
+      border: 1px solid rgba(45, 212, 191, 0.3);
+    }
+
+    .sala-atual strong {
+      color: #22c55e;
+    }
+
+    .pista {
+      margin-top: 6px;
+      padding: 8px;
+      border-radius: 8px;
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px dashed rgba(56, 189, 248, 0.6);
+      font-size: 0.9rem;
+    }
+
+    .pista strong {
+      color: #38bdf8;
+    }
+
+    .botoes-direcao {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 8px 14px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      background: #22c55e;
+      color: #022c22;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.08s ease;
+    }
+
+    button span.icone {
+      font-size: 1rem;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      background: #4ade80;
+    }
+
+    button:disabled {
+      background: #4b5563;
+      color: #9ca3af;
+      box-shadow: none;
+      transform: none;
+      cursor: not-allowed;
+    }
+
+    button.perigo {
+      background: #f97316;
+      color: #111827;
+    }
+
+    button.perigo:hover {
+      background: #fdba74;
+    }
+
+    button.secundario {
+      background: #0ea5e9;
+      color: #0f172a;
+    }
+
+    button.secundario:hover {
+      background: #38bdf8;
+    }
+
+    .log {
+      margin-top: 8px;
+      max-height: 260px;
+      overflow-y: auto;
+      font-size: 0.85rem;
+      padding: 8px;
+      border-radius: 10px;
+      background: #020617;
+      border: 1px solid rgba(30, 64, 175, 0.5);
+    }
+
+    .log-entry {
+      margin-bottom: 4px;
+    }
+
+    .log-entry span {
+      color: #64748b;
+    }
+
+    .lista-pistas {
+      margin-top: 6px;
+      font-size: 0.85rem;
+      border-radius: 10px;
+      padding: 8px;
+      background: #020617;
+      border: 1px solid rgba(55, 65, 81, 0.8);
+      max-height: 160px;
+      overflow-y: auto;
+    }
+
+    .lista-pistas ul {
+      padding-left: 16px;
+      margin: 0;
+    }
+
+    .lista-pistas li {
+      margin-bottom: 4px;
+    }
+
+    .resumo-mansao {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      margin-top: 6px;
+    }
+
+    select, input[type="text"] {
+      border-radius: 999px;
+      padding: 6px 10px;
+      border: 1px solid #374151;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 0.9rem;
+      outline: none;
+    }
+
+    select:focus,
+    input[type="text"]:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.7);
+    }
+
+    .form-julgamento {
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px dashed rgba(75, 85, 99, 0.8);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-julgamento label {
+      font-size: 0.9rem;
+    }
+
+    .resultado-final {
+      margin-top: 6px;
+      padding: 8px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .resultado-final.sucesso {
+      background: rgba(22, 163, 74, 0.15);
+      border: 1px solid rgba(34, 197, 94, 0.7);
+      color: #bbf7d0;
+    }
+
+    .resultado-final.fracasso {
+      background: rgba(220, 38, 38, 0.2);
+      border: 1px solid rgba(248, 113, 113, 0.8);
+      color: #fecaca;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.2);
+      font-size: 0.75rem;
+      color: #e5e7eb;
+      margin-left: 6px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      background: rgba(59, 130, 246, 0.2);
+      border: 1px solid rgba(59, 130, 246, 0.7);
+      color: #bfdbfe;
+      margin-left: 4px;
+    }
+
+    footer {
+      width: 100%;
+      text-align: center;
+      padding: 10px 0 18px;
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Detective Quest - Mansão Enigma</h1>
+    <p>Explore a mansão, colete pistas, relacione suspeitos e faça sua acusação final.</p>
+  </header>
+
+  <main>
+    <!-- Painel principal: exploração da mansão -->
+    <section class="painel">
+      <h2>Exploração da Mansão</h2>
+      <p class="subtitulo">A mansão é representada por uma <strong>árvore binária</strong>. Cada sala pode ter um caminho à esquerda (E) e um à direita (D).</p>
+
+      <div class="status-label">
+        Sala atual:
+        <span class="status-valor" id="sala-atual-label">-</span>
+        <span class="tag" id="tag-raiz">pronto para iniciar</span>
+      </div>
+
+      <div class="sala-atual" id="sala-atual-box">
+        <strong>Bem-vindo(a) à Mansão Enigma.</strong>
+        <p>Pressione <em>"Iniciar Jogo"</em> para começar a investigação.</p>
+      </div>
+
+      <div class="botoes-direcao">
+        <button id="btn-iniciar" class="secundario">
+          <span class="icone">🕵️‍♂️</span> Iniciar Jogo
+        </button>
+        <button id="btn-esquerda">
+          <span class="icone">⬅️</span> Ir para esquerda (E)
+        </button>
+        <button id="btn-direita">
+          <span class="icone">➡️</span> Ir para direita (D)
+        </button>
+        <button id="btn-sair" class="perigo">
+          <span class="icone">🚪</span> Sair da mansão (S)
+        </button>
+        <button id="btn-reiniciar" class="perigo">
+          <span class="icone">🔄</span> Reiniciar
+        </button>
+      </div>
+
+      <div class="log" id="log-exploracao"></div>
+
+      <div class="resumo-mansao">
+        <strong>Mapa fixo:</strong> a mansão é montada manualmente como uma árvore binária no código (sem inserção dinâmica de salas).
+      </div>
+    </section>
+
+    <!-- Painel lateral: pistas, suspeitos, julgamento -->
+    <section class="painel">
+      <h2>Pistas & Julgamento Final</h2>
+      <p class="subtitulo">
+        As pistas coletadas vão para uma <strong>árvore BST</strong> e são associadas a suspeitos em uma <strong>tabela hash</strong>.
+      </p>
+
+      <div class="lista-pistas">
+        <strong>Pistas coletadas (BST em ordem):</strong>
+        <ul id="lista-pistas-ul">
+          <li>Nenhuma pista coletada ainda.</li>
+        </ul>
+      </div>
+
+      <div class="lista-pistas" style="margin-top: 10px;">
+        <strong>Suspeitos conhecidos (tabela hash):</strong>
+        <ul id="lista-suspeitos-ul">
+          <!-- preenchido via JS -->
+        </ul>
+      </div>
+
+      <div class="form-julgamento">
+        <label for="select-suspeito">
+          Escolha um suspeito para acusar:
+        </label>
+        <select id="select-suspeito">
+          <option value="">-- selecione um suspeito --</option>
+        </select>
+
+        <button id="btn-acusar" class="secundario">
+          <span class="icone">⚖️</span> Fazer acusação
+        </button>
+
+        <div class="resultado-final" id="resultado-final"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Mansão Enigma · Árvore binária · BST de pistas · Tabela hash de suspeitos · Recursão e lógica de julgamento
+  </footer>
+
+  <script>
+    // ============================================
+    // LÓGICA DO JOGO (JAVASCRIPT)
+    // Conceitos: Árvore binária, BST, Tabela Hash,
+    // recursão, structs/pointers (adaptados).
+    // ============================================
+
+    // -----------------------------
+    // ESTRUTURAS DE DADOS BÁSICAS
+    // -----------------------------
+
+    /**
+     * Representa uma pista.
+     * Em C, seria armazenada em uma BST (árvore de busca).
+     */
+    const PISTAS_DEFINIDAS = {
+      "luvas-ensanguentadas": {
+        texto: "Luvas ensanguentadas escondidas no armário.",
+        suspeito: "Mordomo"
+      },
+      "contrato-rasgado": {
+        texto: "Contrato de herança rasgado em pedaços.",
+        suspeito: "Sobrinho"
+      },
+      "copo-com-veneno": {
+        texto: "Copo com resquícios de veneno na bandeja.",
+        suspeito: "Chef de Cozinha"
+      },
+      "terra-nas-botas": {
+        texto: "Marcas de terra recente nas botas.",
+        suspeito: "Jardineiro"
+      },
+      "diario-alterado": {
+        texto: "Páginas arrancadas e alteradas do diário da vítima.",
+        suspeito: "Dona da Mansão"
+      },
+      "chave-secreta": {
+        texto: "Chave secreta compatível com o cofre do escritório.",
+        suspeito: "Mordomo"
+      },
+      "foto-incriminadora": {
+        texto: "Foto em que o suspeito discute violentamente com a vítima.",
+        suspeito: "Sobrinho"
+      }
+    };
+
+    // Tabela hash: pistaId -> nome do suspeito
+    // Em C: um array de listas/structs. Aqui usamos um objeto JS.
+    let tabelaHashPistas = {};
+
+    // Conjunto de IDs de pistas já coletadas, para não repetir no BST.
+    let pistasColetadasIds = new Set();
+
+    // --------------------------
+    // ÁRVORE BINÁRIA DA MANSÃO
+    // --------------------------
+
+    /**
+     * Função criarSala()
+     * Em C: criaria dinamicamente uma struct Sala com ponteiros left/right.
+     * Aqui, retornamos um objeto representando o nó da árvore binária.
+     */
+    function criarSala(nome, pistaId, esquerda = null, direita = null) {
+      return {
+        nome,
+        pistaId,      // id da pista associada
+        esquerda,     // ponteiro para sala à esquerda
+        direita       // ponteiro para sala à direita
+      };
+    }
+
+    /**
+     * Monta a mansão manualmente (mapa fixo).
+     * Em C, seria feito no main() com ligações explícitas entre nós.
+     */
+    function montarMansao() {
+      // Nós folha
+      const porao = criarSala("Porão Sombrio", "terra-nas-botas");
+      const jardim = criarSala("Jardim dos Espinhos", null);
+      const cozinha = criarSala("Cozinha Antiga", "copo-com-veneno");
+      const bibliotecaSecreta = criarSala("Biblioteca Secreta", "diario-alterado");
+
+      // Nós intermediários
+      const quartoHospedes = criarSala("Quarto de Hóspedes", "luvas-ensanguentadas", porao, jardim);
+      const salaJantar = criarSala("Sala de Jantar", "contrato-rasgado", cozinha, bibliotecaSecreta);
+
+      // Raiz
+      const hallEntrada = criarSala("Hall de Entrada", "chave-secreta", quartoHospedes, salaJantar);
+
+      return hallEntrada;
+    }
+
+    let raizMansao = null;          // raiz da árvore de salas
+    let salaAtual = null;           // "ponteiro" para a sala atual
+    let jogoIniciado = false;       // controle de estado
+    let exploracaoEncerrada = false;
+
+    // ------------------------------
+    // ÁRVORE BST DAS PISTAS
+    // ------------------------------
+
+    /**
+     * Nó da BST de pistas.
+     */
+    function criarNoBST(pistaId) {
+      const info = PISTAS_DEFINIDAS[pistaId];
+      return {
+        pistaId,
+        texto: info.texto,
+        esquerda: null,
+        direita: null
+      };
+    }
+
+    let raizPistasBST = null;
+
+    /**
+     * Função inserirPista() / adicionarPista()
+     *
+     * Em C:
+     *   - Responsável por inserir uma pista na árvore de busca binária.
+     *   - Receberia ponteiros e manipularia nós recursivamente.
+     *
+     * Aqui em JS:
+     *   - Usamos recursão e retornamos a nova raiz após a inserção.
+     */
+    function inserirPistaBST(raiz, pistaId) {
+      const info = PISTAS_DEFINIDAS[pistaId];
+      if (!info) return raiz; // pista desconhecida
+
+      if (raiz === null) {
+        return criarNoBST(pistaId);
+      }
+
+      if (info.texto.localeCompare(raiz.texto) < 0) {
+        raiz.esquerda = inserirPistaBST(raiz.esquerda, pistaId);
+      } else if (info.texto.localeCompare(raiz.texto) > 0) {
+        raiz.direita = inserirPistaBST(raiz.direita, pistaId);
+      } else {
+        // Texto igual (pista repetida), não insere duplicata
+      }
+      return raiz;
+    }
+
+    /**
+     * Percorre a BST em ordem (in-order) para exibir as pistas coletadas.
+     */
+    function percorrerBSTEmOrdem(no, lista) {
+      if (!no) return;
+      percorrerBSTEmOrdem(no.esquerda, lista);
+      lista.push(no);
+      percorrerBSTEmOrdem(no.direita, lista);
+    }
+
+    function atualizarListaPistasUI() {
+      const ul = document.getElementById("lista-pistas-ul");
+      ul.innerHTML = "";
+
+      if (!raizPistasBST) {
+        const li = document.createElement("li");
+        li.textContent = "Nenhuma pista coletada ainda.";
+        ul.appendChild(li);
+        return;
+      }
+
+      const lista = [];
+      percorrerBSTEmOrdem(raizPistasBST, lista);
+
+      lista.forEach(no => {
+        const suspeito = encontrarSuspeito(no.pistaId);
+        const li = document.createElement("li");
+        li.textContent = no.texto + " ";
+        const span = document.createElement("span");
+        span.className = "badge";
+        span.textContent = "Suspeito: " + suspeito;
+        li.appendChild(span);
+        ul.appendChild(li);
+      });
+    }
+
+    // -----------------------------------
+    // TABELA HASH DE PISTAS → SUSPEITOS
+    // -----------------------------------
+
+    /**
+     * Função inserirNaHash()
+     *
+     * Em C:
+     *   - Implementaria uma tabela hash com colisões e buckets.
+     * Aqui:
+     *   - Usamos um objeto JS como tabela hash simples.
+     */
+    function inserirNaHash(pistaId, suspeito) {
+      tabelaHashPistas[pistaId] = suspeito;
+    }
+
+    /**
+     * Função encontrarSuspeito()
+     *
+     * Em C:
+     *   - Dado o texto/ID da pista, buscaria o suspeito na tabela hash.
+     * Aqui:
+     *   - Fazemos um lookup direto na tabela hash de JS.
+     */
+    function encontrarSuspeito(pistaId) {
+      return tabelaHashPistas[pistaId] || "Desconhecido";
+    }
+
+    /**
+     * Inicializa a tabela hash a partir do objeto PISTAS_DEFINIDAS.
+     */
+    function inicializarTabelaHash() {
+      tabelaHashPistas = {};
+      Object.keys(PISTAS_DEFINIDAS).forEach(id => {
+        inserirNaHash(id, PISTAS_DEFINIDAS[id].suspeito);
+      });
+    }
+
+    function atualizarListaSuspeitosUI() {
+      const ul = document.getElementById("lista-suspeitos-ul");
+      ul.innerHTML = "";
+      const suspeitosSet = new Set();
+
+      Object.keys(PISTAS_DEFINIDAS).forEach(id => {
+        suspeitosSet.add(PISTAS_DEFINIDAS[id].suspeito);
+      });
+
+      const selectSuspeito = document.getElementById("select-suspeito");
+      selectSuspeito.innerHTML = '<option value="">-- selecione um suspeito --</option>';
+
+      suspeitosSet.forEach(s => {
+        const li = document.createElement("li");
+        li.textContent = s;
+        ul.appendChild(li);
+
+        const opt = document.createElement("option");
+        opt.value = s;
+        opt.textContent = s;
+        selectSuspeito.appendChild(opt);
+      });
+    }
+
+    // ----------------------------
+    // SISTEMA DE EXPLORAÇÃO (UI)
+    // ----------------------------
+
+    const logExploracao = document.getElementById("log-exploracao");
+    const salaAtualLabel = document.getElementById("sala-atual-label");
+    const salaAtualBox = document.getElementById("sala-atual-box");
+    const tagRaiz = document.getElementById("tag-raiz");
+    const btnIniciar = document.getElementById("btn-iniciar");
+    const btnEsquerda = document.getElementById("btn-esquerda");
+    const btnDireita = document.getElementById("btn-direita");
+    const btnSair = document.getElementById("btn-sair");
+    const btnReiniciar = document.getElementById("btn-reiniciar");
+    const btnAcusar = document.getElementById("btn-acusar");
+    const resultadoFinalDiv = document.getElementById("resultado-final");
+
+    function adicionarLog(mensagem) {
+      const div = document.createElement("div");
+      div.className = "log-entry";
+      const hora = new Date().toLocaleTimeString();
+      div.innerHTML = `<span>[${hora}]</span> ${mensagem}`;
+      logExploracao.prepend(div);
+    }
+
+    /**
+     * Função explorarSalas()
+     *
+     * Em C:
+     *   - Navegaria recursivamente pela árvore binária de salas,
+     *     lendo E/D/S do teclado e exibindo pistas.
+     *
+     * Aqui:
+     *   - É disparada sempre que a sala atual muda (ou o jogo inicia),
+     *     atualizando a interface, pista e BST.
+     */
+    function explorarSalas() {
+      if (!salaAtual) {
+        salaAtualLabel.textContent = "-";
+        salaAtualBox.innerHTML = "<strong>Nenhuma sala carregada.</strong>";
+        return;
+      }
+
+      salaAtualLabel.textContent = salaAtual.nome;
+      tagRaiz.textContent = (salaAtual === raizMansao) ? "na entrada da mansão" : "explorando";
+
+      let html = `<strong>${salaAtual.nome}</strong>`;
+      html += `<p>Você observa o ambiente em busca de algo suspeito...</p>`;
+
+      // Verifica se há pista associada à sala
+      if (salaAtual.pistaId && PISTAS_DEFINIDAS[salaAtual.pistaId]) {
+        const infoPista = PISTAS_DEFINIDAS[salaAtual.pistaId];
+
+        html += `
+          <div class="pista">
+            <strong>Pista encontrada!</strong><br>
+            ${infoPista.texto}
+          </div>
+        `;
+
+        // Armazena a pista na BST (se ainda não foi coletada)
+        if (!pistasColetadasIds.has(salaAtual.pistaId)) {
+          pistasColetadasIds.add(salaAtual.pistaId);
+          raizPistasBST = inserirPistaBST(raizPistasBST, salaAtual.pistaId);
+          adicionarLog(`Pista coletada na sala "${salaAtual.nome}".`);
+          atualizarListaPistasUI();
+        }
+      } else {
+        html += `
+          <div class="pista">
+            Nenhuma pista relevante foi encontrada aqui.
+          </div>
+        `;
+      }
+
+      salaAtualBox.innerHTML = html;
+
+      // Habilita/desabilita botões de direção com base nos filhos
+      btnEsquerda.disabled = !salaAtual.esquerda || exploracaoEncerrada;
+      btnDireita.disabled = !salaAtual.direita || exploracaoEncerrada;
+    }
+
+    function moverParaEsquerda() {
+      if (!salaAtual || !salaAtual.esquerda) {
+        alert("Não há sala à esquerda.");
+        return;
+      }
+      salaAtual = salaAtual.esquerda;
+      adicionarLog(`Você segue pelo corredor à esquerda até "${salaAtual.nome}".`);
+      explorarSalas();
+    }
+
+    function moverParaDireita() {
+      if (!salaAtual || !salaAtual.direita) {
+        alert("Não há sala à direita.");
+        return;
+      }
+      salaAtual = salaAtual.direita;
+      adicionarLog(`Você segue pelo corredor à direita até "${salaAtual.nome}".`);
+      explorarSalas();
+    }
+
+    function encerrarExploracao() {
+      if (!jogoIniciado || exploracaoEncerrada) return;
+      exploracaoEncerrada = true;
+
+      adicionarLog("Exploração encerrada. Chegou a hora da acusação final.");
+      salaAtualBox.innerHTML += `
+        <p><strong>Você decide que já possui pistas suficientes... ou não.</strong><br>
+        Vá até o painel de julgamento e escolha um suspeito.</p>
+      `;
+
+      btnEsquerda.disabled = true;
+      btnDireita.disabled = true;
+      btnSair.disabled = true;
+      btnIniciar.disabled = true;
+    }
+
+    // --------------------------
+    // JULGAMENTO FINAL
+    // --------------------------
+
+    /**
+     * Função verificarSuspeitoFinal()
+     *
+     * Em C:
+     *   - Percorreria a árvore de pistas recursivamente e contaria
+     *     quantas pistas apontam para o suspeito acusado, usando a
+     *     tabela hash.
+     *
+     * Aqui em JS:
+     *   - Faz exatamente isso com recursão sobre a BST.
+     */
+    function contarPistasParaSuspeito(no, suspeito, contadorRef) {
+      if (!no) return;
+      contarPistasParaSuspeito(no.esquerda, suspeito, contadorRef);
+      const suspeitoDaPista = encontrarSuspeito(no.pistaId);
+      if (suspeitoDaPista === suspeito) {
+        contadorRef.count++;
+      }
+      contarPistasParaSuspeito(no.direita, suspeito, contadorRef);
+    }
+
+    function verificarSuspeitoFinal(suspeitoAcusado) {
+      if (!raizPistasBST) {
+        return {
+          sucesso: false,
+          pistasEncontradas: 0,
+          mensagem: "Nenhuma pista foi coletada. A acusação não se sustenta."
+        };
+      }
+
+      const contadorRef = { count: 0 };
+      contarPistasParaSuspeito(raizPistasBST, suspeitoAcusado, contadorRef);
+
+      if (contadorRef.count >= 2) {
+        return {
+          sucesso: true,
+          pistasEncontradas: contadorRef.count,
+          mensagem: `A acusação contra ${suspeitoAcusado} é consistente: ${contadorRef.count} pistas apontam para ele(a).`
+        };
+      } else {
+        return {
+          sucesso: false,
+          pistasEncontradas: contadorRef.count,
+          mensagem: `A acusação contra ${suspeitoAcusado} é fraca: apenas ${contadorRef.count} pista(s) o(a) apontam.`
+        };
+      }
+    }
+
+    function realizarAcusacao() {
+      const select = document.getElementById("select-suspeito");
+      const suspeito = select.value;
+
+      if (!exploracaoEncerrada) {
+        if (!confirm("Você ainda não encerrou a exploração. Encerrar agora e ir direto ao julgamento?")) {
+          return;
+        }
+        encerrarExploracao();
+      }
+
+      if (!suspeito) {
+        alert("Selecione um suspeito antes de acusar.");
+        return;
+      }
+
+      const resultado = verificarSuspeitoFinal(suspeito);
+      resultadoFinalDiv.style.display = "block";
+      resultadoFinalDiv.textContent = resultado.mensagem;
+
+      if (resultado.sucesso) {
+        resultadoFinalDiv.className = "resultado-final sucesso";
+        adicionarLog(`Julgamento: acusação contra ${suspeito} considerada consistente (${resultado.pistasEncontradas} pistas).`);
+        alert("Parabéns, detetive! Sua lógica estava correta.");
+      } else {
+        resultadoFinalDiv.className = "resultado-final fracasso";
+        adicionarLog(`Julgamento: acusação contra ${suspeito} considerada fraca (${resultado.pistasEncontradas} pistas).`);
+        alert("Sua acusação não se sustentou em tribunal. O verdadeiro culpado segue à solta...");
+      }
+    }
+
+    // --------------------------
+    // CONTROLE GERAL DO JOGO
+    // --------------------------
+
+    function iniciarJogo() {
+      raizMansao = montarMansao();
+      salaAtual = raizMansao;
+      jogoIniciado = true;
+      exploracaoEncerrada = false;
+      pistasColetadasIds = new Set();
+      raizPistasBST = null;
+      resultadoFinalDiv.style.display = "none";
+      resultadoFinalDiv.textContent = "";
+      logExploracao.innerHTML = "";
+      btnSair.disabled = false;
+
+      inicializarTabelaHash();
+      atualizarListaSuspeitosUI();
+      atualizarListaPistasUI();
+
+      adicionarLog("Jogo iniciado. A mansão foi montada como uma árvore binária.");
+      explorarSalas();
+    }
+
+    function reiniciarJogo() {
+      if (!confirm("Deseja realmente reiniciar o caso? Todo o progresso será perdido.")) {
+        return;
+      }
+
+      raizMansao = null;
+      salaAtual = null;
+      jogoIniciado = false;
+      exploracaoEncerrada = false;
+      pistasColetadasIds = new Set();
+      raizPistasBST = null;
+      tabelaHashPistas = {};
+      logExploracao.innerHTML = "";
+      resultadoFinalDiv.style.display = "none";
+      resultadoFinalDiv.textContent = "";
+      salaAtualLabel.textContent = "-";
+      tagRaiz.textContent = "pronto para iniciar";
+      salaAtualBox.innerHTML = `
+        <strong>Bem-vindo(a) à Mansão Enigma.</strong>
+        <p>Pressione <em>"Iniciar Jogo"</em> para começar a investigação.</p>
+      `;
+
+      document.getElementById("lista-pistas-ul").innerHTML =
+        "<li>Nenhuma pista coletada ainda.</li>";
+      document.getElementById("lista-suspeitos-ul").innerHTML = "";
+      document.getElementById("select-suspeito").innerHTML =
+        '<option value="">-- selecione um suspeito --</option>';
+
+      btnEsquerda.disabled = true;
+      btnDireita.disabled = true;
+      btnSair.disabled = true;
+      btnIniciar.disabled = false;
+    }
+
+    // --------------------------
+    // EVENTOS DE INTERFACE
+    // --------------------------
+
+    btnIniciar.addEventListener("click", () => {
+      iniciarJogo();
+      btnIniciar.disabled = true;
+    });
+
+    btnEsquerda.addEventListener("click", moverParaEsquerda);
+    btnDireita.addEventListener("click", moverParaDireita);
+    btnSair.addEventListener("click", encerrarExploracao);
+    btnReiniciar.addEventListener("click", reiniciarJogo);
+    btnAcusar.addEventListener("click", realizarAcusacao);
+
+    // Estado inicial de botões
+    btnEsquerda.disabled = true;
+    btnDireita.disabled = true;
+    btnSair.disabled = true;
+  </script>
+</body>
+</html>
