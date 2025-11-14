@@ -1,38 +1,77 @@
+# 🕵️ Detective Quest – Mansão Enigma  
+### Um projeto interativo usando **Árvore Binária + BST + Hash Table** (HTML + CSS + JS)
+
+Este projeto simula a mecânica de investigação do jogo *Detective Quest*, da Enigma Studios.  
+O jogador explora uma mansão representada como uma **árvore binária**, coleta pistas que são armazenadas em uma **árvore de busca (BST)** e as relaciona a suspeitos via **tabela hash**.  
+Ao terminar a exploração, o sistema realiza automaticamente o julgamento final.
 
 ---
 
-## 🚀 Como executar
+## 🎮 Funcionalidades
 
-1. Baixe o arquivo `index.html`
-2. Abra no seu navegador (Chrome, Firefox, Edge…)
-3. Clique em **Iniciar Jogo**
-4. Explore a mansão
-5. Colete pistas
-6. Faça sua acusação final ⚖️
-
----
-
-## 🎨 Diferenciais Visuais (Novo CSS)
-- Tema escuro elegante  
-- Cores neon sutis  
-- Painéis com borda lateral  
-- Botões com animação  
-- Layout mais limpo  
+### ✔️Exploração da mansão (Árvore Binária)
+A mansão é montada manualmente no código como uma estrutura fixa:
+- Cada sala possui:  
+  - Nome  
+  - Possível caminho à esquerda  
+  - Possível caminho à direita  
+  - Uma pista opcional associada  
+- O jogador navega por:  
+  - (E) Esquerda  
+  - (D) Direita  
+  - (S) Sair da mansão  
 
 ---
 
-## 📜 Créditos
-
-Projeto desenvolvido como solução didática para o desafio técnico da **Enigma Studios**, demonstrando:
-- Estruturas de dados
-- Lógica de jogo
-- HTML + CSS + JS modernos
+### ✔️Coleta de pistas (BST)
+Cada pista encontrada:
+- É identificada automaticamente ao entrar na sala  
+- É inserida em uma **árvore binária de busca**  
+- É exibida ordenadamente usando percurso **in-order**  
 
 ---
 
-Se quiser:
-- Gerar screenshots  
-- Criar GIF de demonstração  
-- Criar versão 2.0 com inventário, ranking ou música
+### ✔️Tabela Hash de suspeitos
+Cada pista aponta para um suspeito fixo.  
+A tabela hash implementa essa relação:  
+🗝 pista → suspeito
 
-Só pedir!  
+Exemplo:
+- "luvas-ensanguentadas" → "Mordomo"  
+- "contrato-rasgado" → "Sobrinho"
+
+---
+
+### ✔️Julgamento final automatizado
+Após encerrar a exploração:
+- O jogador escolhe um suspeito  
+- O sistema busca na BST todas as pistas coletadas  
+- Para cada pista, a hash table indica qual suspeito ela aponta  
+- Se **≥ 2 pistas** apontam para o acusado → **Vitória do jogador**  
+- Caso contrário → Acusação falha  
+
+---
+
+## 🧩 Conceitos de Estrutura de Dados Utilizados
+
+### 🌳 ÁRVORE BINÁRIA
+Representa o mapa fixo da mansão.
+
+### 🌲 BST (Árvore Binária de Busca)
+Organiza todas as pistas coletadas automaticamente:
+- Inserção ordenada
+- Percurso In-Order
+- Busca eficiente
+
+### 🔑 TABELA HASH
+Associa pistas a suspeitos com acesso em O(1).
+
+### ↔️ Ponteiros e Recursão (Simulados em JS)
+- Movimentação entre salas usa referências similares a ponteiros  
+- Inserção na BST é totalmente recursiva  
+- Verificação de pistas do suspeito usa percurso recursivo  
+
+---
+
+## 📁 Estrutura do Projeto
+
